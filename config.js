@@ -8,8 +8,8 @@
 module.exports = {
     "Cookie": "SET YOUR COOKIE HERE",
     "CookieArray": [],
-    "Ip": "0.0.0.0",
-    "Port": 10000,
+    "Ip": "127.0.0.1",
+    "Port": 8444,
     "BufferSize": 1,
     "SystemInterval": 3,
     "padtxt_placeholder": "",

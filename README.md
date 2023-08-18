@@ -10,12 +10,13 @@
     align="left"
   />
 
-doom & coom
 </a>
+
 <br>
 
-Warning: Some accounts are getting _hard-censored_ by the **rats**, you might notice it
+[原版Clewd](https://gitgud.io/ahsk/clewd) 
 
+[Clewd教程](https://rentry.org/teralomaniac_clewd) 
 <br>
 <br>
 <hr>
@@ -32,6 +33,10 @@ nodejs>=20.4.*
 ## Defaults
 
 ### SettingName: (DEFAULT)/opt1/opt2...
+
+ - `Superfetch`: (true)/false
+    * true will use an alternate method to get past the `We are unable to serve your request` error
+    * false won't use this method and you may get the error again
 
  - `PreventImperson`: (false)/true
     * true trims the bot reply immediately if he says "Human:", "Assistant:", "H:" or "A:"
@@ -120,11 +125,3 @@ nodejs>=20.4.*
 > **AllSamples**: true
 
 > **StripAssistant**: true (add prefill to jailbreak in this case)
-
-## Downloads
-
-> ### [Download latest version](https://gitgud.io/ahsk/clewd/-/archive/master/clewd-master.zip)
-
-> ### [Download 2.7](https://gitgud.io/ahsk/clewd/-/archive/2.7/clewd-2.7.zip)
-
-> ### [Download 1.6](https://gitgud.io/ahsk/clewd/-/archive/1.6/clewd-1.6.zip)

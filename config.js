@@ -31,8 +31,8 @@ module.exports = {
         "padtxt": true,
         "xmlPlot": true,
         "localtunnel": false,
-        "VPNfree": true,
-        "Superfetch": false
+        "VPNfree": false,
+        "Superfetch": true
     },
     "PersonalityFormat": "{{CHAR}}'s personality: {{PERSONALITY}}",
     "ScenarioFormat": "Dialogue scenario: {{SCENARIO}}"

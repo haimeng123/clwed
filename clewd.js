@@ -1,6 +1,6 @@
 /*
-* https://rentry.org/teralomaniac_clewd
-* https://github.com/teralomaniac/clewd
+* https://gitgud.io/ahsk/clewd
+* https://github.com/h-a-s-k/clewd
 */
 'use strict';
 
@@ -17,7 +17,6 @@ const {Blob} = require('node:buffer');
 const FS = require('node:fs');
 
 const Path = require('node:path');
-const { config } = require('node:process');
 
 const Decoder = new TextDecoder;
 
@@ -63,115 +62,16 @@ let prevImpersonated = false;
 
 let uuidOrg;
 
-/******************************************************* */
-let currentIndex = 0;
-
-let Firstlogin = true;
-
-const events = require('events');
-const CookieChanger = new events.EventEmitter();
-
-CookieChanger.on('ChangeCookie', () => {
-    Proxy && Proxy.close();
-    console.log('\nChanging Cookie...\n');
-    Proxy.listen(Config.Port, Config.Ip, onListen);
-    Proxy.on('error', (err => {
-        console.error('Proxy error\n%o', err);
-    }));
-});
-
-const padJson = (json) => {
-    if (Config.padtxt_placeholder.length > 0){
-        var placeholder = Config.padtxt_placeholder;
-    }
-    else {
-        const bytes = randomInt(5, 15);
-        var placeholder = randomBytes(bytes).toString('hex');
-    }
-    
-    var sizeInBytes = new Blob([json]).size; // 计算json数据的字节大小
-
-    // 计算需要添加的占位符数量, 注意你需要注意到UTF-8编码中中文字符占3字节
-    var count = Math.floor((32000 - sizeInBytes) / new Blob([placeholder]).size); 
-
-    // 生成占位符字符串
-    var padding = '';
-    for (var i = 0; i < count; i++) {
-        padding += placeholder;
-    }
-
-    // 在json前面添加占位符, 在末尾增加空行然后添加json
-    var result = padding + '\n\n\n' + json;
-
-    result = result.replace(/^\s*/, '');
-
-    return result
-};
-
-const AddxmlPlot = (content) => {
-    // 检查内容中是否包含"<card>","[Start a new"字符串
-    if (!content.includes('<card>')) {
-        return content;
-    }
-
-    content = content.replace(/\[Start a new chat\]/gm, '\n[Start a new chat]');
-    content = content.replace(/\n\nSystem:\s*/g, '\n\n');
-
-    // 在第一个"[Start a new"前面加上"<example>"，在最后一个"[Start a new"前面加上"</example>"
-    let firstChatStart = content.indexOf('\n\n[Start a new');
-    let lastChatStart = content.lastIndexOf('\n\n[Start a new');
-    if (firstChatStart != -1) { 
-        content = content.slice(0, firstChatStart) + '\n\n</card>\n\n<example>' + 
-                content.slice(firstChatStart, lastChatStart) + '\n\n</example>' + 
-                content.slice(lastChatStart);
-    }
-        
-    // 之后的第一个"Assistant: "之前插入"\n\n<plot>"
-    let lastChatIndex = content.lastIndexOf('\n\n[Start a new');
-    if (lastChatIndex != -1 && content.includes('</plot>')) { 
-        let assistantIndex = content.indexOf('\n\nAssistant:', lastChatIndex);
-        if (assistantIndex != -1) {
-            content = content.slice(0, assistantIndex) + '\n\n<plot>' + content.slice(assistantIndex);
-        }
-    }
-  
-    let sexMatch = content.match(/\n##.*?\n<sex>[\s\S]*?<\/sex>\n/);
-    let processMatch = content.match(/\n##.*?\n<process>[\s\S]*?<\/process>\n/);
-  
-    if (sexMatch && processMatch) {
-        content = content.replace(sexMatch[0], ""); // 移除<sex>部分
-        content = content.replace(processMatch[0], sexMatch[0] + processMatch[0]); // 将<sex>部分插入<delete>部分的前面
-    }
-
-    let illustrationMatch = content.match(/\n##.*?\n<illustration>[\s\S]*?<\/illustration>\n/);
-
-    if (illustrationMatch && processMatch) {
-        content = content.replace(illustrationMatch[0], ""); // 移除<illustration>部分
-        content = content.replace(processMatch[0], illustrationMatch[0] + processMatch[0]); // 将<illustration>部分插入<delete>部分的前面
-    }
-
-    content = content.replace(/\n\n<(hidden|\/plot)>[\s\S]*?\n\n<extra_prompt>\s*/, '\n\nHuman:'); //sd prompt用
-
-    //消除空XML tags或多余的\n
-    content = content.replace(/(?<=\n<(card|hidden|example)>\n)\s*/g, '');
-    content = content.replace(/\s*(?=\n<\/(card|hidden|example)>(\n|$))/g, '');
-    content = content.replace(/\n\n<(example|hidden)>\n<\/\1>/g, '');
-
-    return content
-};
-/******************************************************* */
 /**
  * Edit settings in your config.js instead
  * these are the defaults and change every update
  * @preserve
  */ let Config = {
     Cookie: '',
-    CookieArray: [],
-    Ip: process.env.PORT ? '0.0.0.0' : '127.0.0.1',
-    Port: process.env.PORT || 8444,
-    BufferSize: 1,
+    Ip: '127.0.0.1',
+    Port: 8444,
+    BufferSize: 8,
     SystemInterval: 3,
-    padtxt_placeholder: '',
     Settings: {
         PreventImperson: false,
         PromptExperiments: true,
@@ -183,22 +83,16 @@ const AddxmlPlot = (content) => {
         StripAssistant: false,
         StripHuman: false,
         PassParams: false,
-        ClearFlags: true,
-        PreserveChats: true,
-        LogMessages: true,
-        FullColon: true,
-        padtxt: true,
-        xmlPlot: true,
-        localtunnel: false,       
-        VPNfree: true,
-        Superfetch: false
+        ClearFlags: false,
+        PreserveChats: false,
+        LogMessages: false,
+        Superfetch: true
     },
     PersonalityFormat: '{{CHAR}}\'s personality: {{PERSONALITY}}',
     ScenarioFormat: 'Dialogue scenario: {{SCENARIO}}'
 };
 
-const Main = 'clewd v3.7修改版 by tera';
-/******************************************************* */
+const Main = 'clewd v3.7';
 
 ServerResponse.prototype.json = async function(body, statusCode = 200, headers) {
     body = body instanceof Promise ? await body : body;
@@ -215,7 +109,7 @@ Array.prototype.sample = function() {
 };
 
 const AI = {
-    end: () => Config.Settings.VPNfree ? Buffer.from([ 104, 116, 116, 112, 115, 58, 47, 47, 99, 104, 97, 116, 46, 99, 108, 97, 117, 100, 101, 97, 105, 46, 97, 105 ]).toString() : Buffer.from([ 104, 116, 116, 112, 115, 58, 47, 47, 99, 108, 97, 117, 100, 101, 46, 97, 105 ]).toString(),
+    end: () => Buffer.from([ 104, 116, 116, 112, 115, 58, 47, 47, 99, 108, 97, 117, 100, 101, 46, 97, 105 ]).toString(),
     mdl: () => Buffer.from([ 99, 108, 97, 117, 100, 101, 45, 50 ]).toString(),
     cp: () => Buffer.from([ 55, 55, 49, 44, 52, 56, 54, 53, 45, 52, 56, 54, 54, 45, 52, 56, 54, 55, 45, 52, 57, 49, 57, 53, 45, 52, 57, 49, 57, 57, 45, 52, 57, 49, 57, 54, 45, 52, 57, 50, 48, 48, 45, 53, 50, 51, 57, 51, 45, 53, 50, 51, 57, 50, 45, 52, 57, 49, 55, 49, 45, 52, 57, 49, 55, 50, 45, 49, 53, 54, 45, 49, 53, 55, 45, 52, 55, 45, 53, 51, 44, 48, 45, 50, 51, 45, 54, 53, 50, 56, 49, 45, 49, 48, 45, 49, 49, 45, 51, 53, 45, 49, 54, 45, 53, 45, 49, 51, 45, 49, 56, 45, 53, 49, 45, 52, 53, 45, 52, 51, 45, 50, 55, 45, 49, 55, 53, 49, 51, 45, 50, 49, 44, 50, 57, 45, 50, 51, 45, 50, 52, 44, 48 ]).toString(),
     agent: () => Buffer.from([ 77, 111, 122, 105, 108, 108, 97, 47, 53, 46, 48, 32, 40, 77, 97, 99, 105, 110, 116, 111, 115, 104, 59, 32, 73, 110, 116, 101, 108, 32, 77, 97, 99, 32, 79, 83, 32, 88, 32, 49, 48, 95, 49, 53, 95, 55, 41, 32, 65, 112, 112, 108, 101, 87, 101, 98, 75, 105, 116, 47, 53, 51, 55, 46, 51, 54, 32, 40, 75, 72, 84, 77, 76, 44, 32, 108, 105, 107, 101, 32, 71, 101, 99, 107, 111, 41, 32, 67, 104, 114, 111, 109, 101, 47, 49, 49, 52, 46, 48, 46, 48, 46, 48, 32, 83, 97, 102, 97, 114, 105, 47, 53, 51, 55, 46, 51, 54, 32, 69, 100, 103, 47, 49, 49, 52, 46, 48, 46, 49, 56, 50, 51, 46, 55, 57 ]).toString(),
@@ -327,25 +221,7 @@ const setTitle = title => {
 };
 
 const onListen = async () => {
-/***************************** */
-    if (Firstlogin) {
-        Firstlogin = false;   
-        console.log(`[2m${Main}[0m\n[33mhttp://${Config.Ip}:${Config.Port}/v1[0m\n\n${Object.keys(Config.Settings).map((setting => UnknownSettings.includes(setting) ? `??? [31m${setting}: ${Config.Settings[setting]}[0m` : `[1m${setting}:[0m ${ChangedSettings.includes(setting) ? '[33m' : '[36m'}${Config.Settings[setting]}[0m`)).sort().join('\n')}\n`);
-        if (Config.Settings.localtunnel) {
-            const localtunnel = require('localtunnel');
-            localtunnel({ port: Config.Port })
-            .then((tunnel) => {
-                console.log(`\nTunnel URL for outer websites: ${tunnel.url}/v1\n`);
-            })
-        }
-    }
-    if (Config.CookieArray.length > 0) {
-        currentIndex = (currentIndex + 1) % Config.CookieArray.length;
-        Config.Cookie = Config.CookieArray[currentIndex];
-    }
-/***************************** */
     CycleTLS = Config.Settings.Superfetch ? require('cycletls') : null;
-
     if ('SET YOUR COOKIE HERE' === Config.Cookie || Config.Cookie?.length < 1) {
         throw Error('Set your cookie inside config.js');
     }
@@ -359,13 +235,6 @@ const onListen = async () => {
     });
     const accInfo = (await accRes.json())?.[0];
     if (!accInfo || accInfo.error) {
-/**************************** */
-        if (accRes.statusText === 'Forbidden' && Config.CookieArray.length > 0){
-            Config.CookieArray = Config.CookieArray.filter(item => item !== Config.Cookie);
-            writeSettings(Config);
-            return CookieChanger.emit('ChangeCookie');
-        }
-/**************************** */
         throw Error(`Couldn't get account info: "${accInfo?.error?.message || accRes.statusText}"`);
     }
     if (!accInfo?.uuid) {
@@ -374,7 +243,7 @@ const onListen = async () => {
     setTitle('ok');
     updateParams(accRes);
     await checkResErr(accRes);
-    //console.log(`[2m${Main}[0m\n[33mhttp://${Config.Ip}:${Config.Port}/v1[0m\n\n${Object.keys(Config.Settings).map((setting => UnknownSettings.includes(setting) ? `??? [31m${setting}: ${Config.Settings[setting]}[0m` : `[1m${setting}:[0m ${ChangedSettings.includes(setting) ? '[33m' : '[36m'}${Config.Settings[setting]}[0m`)).sort().join('\n')}\n`);
+    console.log(`[2m${Main}[0m\n[33mhttp://${Config.Ip}:${Config.Port}/v1[0m\n\n${Object.keys(Config.Settings).map((setting => UnknownSettings.includes(setting) ? `??? [31m${setting}: ${Config.Settings[setting]}[0m` : `[1m${setting}:[0m ${ChangedSettings.includes(setting) ? '[33m' : '[36m'}${Config.Settings[setting]}[0m`)).sort().join('\n')}\n`);
     console.log('Logged in %o', {
         name: accInfo.name?.split('@')?.[0],
         capabilities: accInfo.capabilities
@@ -408,9 +277,6 @@ const onListen = async () => {
             const json = await req.json();
             console.log(`${type}: ${json.error ? json.error.message || json.error.type || json.detail : 'OK'}`);
         })(flag.type))));
-/***************************** */
-        CookieChanger.emit('ChangeCookie');
-/***************************** */
     }
     const convRes = await fetch(`${AI.end()}/api/organizations/${uuidOrg}/chat_conversations`, {
         method: 'GET',
@@ -434,16 +300,6 @@ const checkResErr = async res => {
                 err.planned = true;
                 error.message && (err.message = error.message);
                 error.type && (err.type = error.type);
-/************************** */
-                if (error.message.includes('read-only mode')) {
-                    Config.CookieArray = Config.CookieArray.filter(item => item !== Config.Cookie);
-                    writeSettings(Config);
-                    CookieChanger.emit('ChangeCookie');
-                }
-                else if (error.message.includes('Exceeded completions limit')) {
-                    CookieChanger.emit('ChangeCookie');
-                }
-/************************** */
                 if (429 === res.status && error.resets_at) {
                     const hours = ((new Date(1e3 * error.resets_at).getTime() - Date.now()) / 1e3 / 60 / 60).toFixed(2);
                     err.message += `, expires in ${hours} hours`;
@@ -608,7 +464,7 @@ class ClewdStream extends TransformStream {
 }
 
 const writeSettings = async (config, firstRun = false) => {
-    FS.writeFileSync(ConfigPath, `/*\n* https://rentry.org/teralomaniac_clewd\n* https://github.com/teralomaniac/clewd\n*/\n\n// SET YOUR COOKIE BELOW\n\nmodule.exports = ${JSON.stringify(config, null, 4)}\n\n/*\n BufferSize\n * How many characters will be buffered before the AI types once\n * lower = less chance of \`PreventImperson\` working properly\n\n ---\n\n SystemInterval\n * How many messages until \`SystemExperiments alternates\`\n\n ---\n\n Other settings\n * https://gitgud.io/ahsk/clewd/#defaults\n * and\n * https://gitgud.io/ahsk/clewd/-/blob/master/CHANGELOG.md\n */`.trim().replace(/((?<!\r)\n|\r(?!\n))/g, '\r\n'));
+    FS.writeFileSync(ConfigPath, `/*\n* https://gitgud.io/ahsk/clewd\n* https://github.com/h-a-s-k/clewd\n*/\n\n// SET YOUR COOKIE BELOW\n\nmodule.exports = ${JSON.stringify(config, null, 4)}\n\n/*\n BufferSize\n * How many characters will be buffered before the AI types once\n * lower = less chance of \`PreventImperson\` working properly\n\n ---\n\n SystemInterval\n * How many messages until \`SystemExperiments alternates\`\n\n ---\n\n Other settings\n * https://gitgud.io/ahsk/clewd/#defaults\n * and\n * https://gitgud.io/ahsk/clewd/-/blob/master/CHANGELOG.md\n */`.trim().replace(/((?<!\r)\n|\r(?!\n))/g, '\r\n'));
     if (firstRun) {
         console.warn('[33mConfig file created!\nedit[0m [1mconfig.js[0m [33mto set your settings and restart the program[0m');
         process.exit(0);
@@ -867,19 +723,14 @@ const Proxy = Server((async (req, res) => {
                     console.log(`${model} [[2m${type}[0m]${!retryRegen && systems.length > 0 ? ' ' + systems.join(' [33m/[0m ') : ''}`);
                     'R' !== type || prompt || (prompt = '...regen...');
                     Logger?.write(`\n\n-------\n[${(new Date).toLocaleString()}]\n####### PROMPT (${type}):\n${prompt}\n--\n####### REPLY:\n`);
-/****************************************************************/
-                    if (Config.Settings.xmlPlot) {prompt = AddxmlPlot(prompt)};
-                    if (Config.Settings.FullColon) {prompt = prompt.replace(/(?<=\n\n(H(?:uman)?|A(?:ssistant)?)):[ ]?/g, '：')};
-                    if (Config.Settings.padtxt) {prompt = padJson(prompt)};
-/****************************************************************/                    
                     retryRegen || (fetchAPI = await (async (signal, body, model, prompt, temperature) => {
                         const attachments = [];
                         if (Config.Settings.PromptExperiments) {
                             attachments.push({
-                                extracted_content: (prompt),
-                                file_name: 'paste.txt',  //fileName(),
+                                extracted_content: prompt,
+                                file_name: fileName(),
                                 file_size: Buffer.from(prompt).byteLength,
-                                file_type: 'txt'  //'text/plain'
+                                file_type: 'text/plain'
                             });
                             prompt = '';
                         }
@@ -986,7 +837,7 @@ const Proxy = Server((async (req, res) => {
                 param: null,
                 code: 404
             }
-        }, 200);
+        }, 404);
     }
 }));
 
@@ -1027,19 +878,7 @@ const Proxy = Server((async (req, res) => {
             Config.Cookie = 'SET YOUR COOKIE HERE';
             writeSettings(Config, true);
         }
-/***************************** */
-        for (let key in Config) {
-            if (key === 'Settings') {
-                for (let setting in Config.Settings) {
-                    Config.Settings[setting] = process.env[setting] ?? Config.Settings[setting];
-                }
-            } else {
-                Config[key] = key === 'CookieArray' ? (process.env[key]?.split(',') ?? Config[key]) : (process.env[key] ?? Config[key]);
-            }
-        }
-/***************************** */
     })();
-    currentIndex = Math.floor(Math.random() * Config.CookieArray.length);
     Proxy.listen(Config.Port, Config.Ip, onListen);
     Proxy.on('error', (err => {
         console.error('Proxy error\n%o', err);

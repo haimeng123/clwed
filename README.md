@@ -10,13 +10,12 @@
     align="left"
   />
 
+doom & coom
 </a>
-
 <br>
 
-[原版Clewd](https://gitgud.io/ahsk/clewd) 
+Warning: Some accounts are getting _hard-censored_ by the **rats**, you might notice it
 
-[Clewd教程](https://rentry.org/teralomaniac_clewd) 
 <br>
 <br>
 <hr>
@@ -125,3 +124,17 @@ nodejs>=20.4.*
 > **AllSamples**: true
 
 > **StripAssistant**: true (add prefill to jailbreak in this case)
+
+## Contact
+
+- hask1911@proton.me
+
+- !!o8au/gO6660
+
+## Downloads
+
+> ### [Download latest version](https://gitgud.io/ahsk/clewd/-/archive/master/clewd-master.zip)
+
+> ### [Download 2.7](https://gitgud.io/ahsk/clewd/-/archive/2.7/clewd-2.7.zip)
+
+> ### [Download 1.6](https://gitgud.io/ahsk/clewd/-/archive/1.6/clewd-1.6.zip)

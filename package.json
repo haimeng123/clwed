@@ -4,7 +4,7 @@
   "description": ":^)",
   "main": "clewd.js",
   "engines": {
-    "node": ">=20.2.0"
+    "node": ">=20.4.0"
   },
   "scripts": {
     "run": "node clewd.js"

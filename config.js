@@ -8,8 +8,8 @@
 module.exports = {
     "Cookie": "SET YOUR COOKIE HERE",
     "CookieArray": [],
-    "Ip": "127.0.0.1",
-    "Port": 8444,
+    "Ip": "0.0.0.0",
+    "Port": 10000,
     "BufferSize": 1,
     "SystemInterval": 3,
     "padtxt_placeholder": "",
@@ -31,8 +31,8 @@ module.exports = {
         "padtxt": true,
         "xmlPlot": true,
         "localtunnel": false,
-        "VPNfree": false,
-        "Superfetch": true
+        "VPNfree": true,
+        "Superfetch": false
     },
     "PersonalityFormat": "{{CHAR}}'s personality: {{PERSONALITY}}",
     "ScenarioFormat": "Dialogue scenario: {{SCENARIO}}"
